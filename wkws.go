@@ -9,22 +9,18 @@ type Error struct {
 }
 
 type Wkws struct {
-	Address     string `json:"address"`
-	Port        string `json:"port"`
 	RouterGroup Routers
 }
 
-func Init(add string, port string) (core *Wkws) {
+func Init() (core *Wkws) {
 	core = &Wkws{
-		Address:     add,
-		Port:        port,
 		RouterGroup: nil,
 	}
 	return
 }
 
-func (wkws *Wkws) Run() (err error) {
-	addr := wkws.Address + ":" + wkws.Port
+func (wkws *Wkws) Run(add string, port string) (err error) {
+	addr := add + ":" + port
 	CLogger("HTTP listen the address , %s \n", addr)
 	r := http.NewServeMux()
 	CLogger("Router map:")
@@ -37,22 +33,23 @@ func (wkws *Wkws) Run() (err error) {
 }
 
 func (wkws *Wkws) ServeHTTP(rsp http.ResponseWriter, req *http.Request) {
-	c := Context{}
+	c := NewCtx()
 	c.Request = req
 	c.ResponseWriter = rsp
-	controller, err := wkws.CheckMethod(&c)
+	controller, err := wkws.HandlerHttpRequest(c)
 	if err != nil {
 		return
 	}
-	controller(&c)
+	controller(c)
 }
 
-func (wkws *Wkws) CheckMethod(c *Context) (Controller, error) {
-	handler, verify := wkws.VerifyMethod(c.Request.RequestURI, c.Request.Method)
+func (wkws *Wkws) HandlerHttpRequest(c *Context) (Controller, error) {
+	handler, verify := wkws.VerifyMethod(c.Request.URL.Path, c.Request.Method)
 	if !verify {
 		ServerFailed(c)
 		return nil, &WkwsError{Msg: "error"}
 	}
+	// TODO Handler Request Params
 	return handler, nil
 }
 
@@ -63,4 +60,13 @@ func (wkws *Wkws) VerifyMethod(path string, method string) (Controller, bool) {
 		}
 	}
 	return nil, false
+}
+
+func ServerFailed(c *Context) {
+	c.ResponseWriter.WriteHeader(405)
+	_, err := c.ResponseWriter.Write([]byte("405 method not allowed"))
+	if err != nil {
+		CLogger("cannot write message %v", err)
+	}
+	return
 }
