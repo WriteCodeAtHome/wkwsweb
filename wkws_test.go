@@ -39,6 +39,7 @@ func TestWkws_ContextCache(t *testing.T) {
 	core := Init()
 	core.GET("/cache", CacheController)
 	core.GET("/response", ResponseController)
+	core.POST("/response", ResponseController)
 	err := core.Run("0.0.0.0", "8081")
 	if err != nil {
 		log.Println(err)
