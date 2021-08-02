@@ -46,7 +46,7 @@ func (wkws *Wkws) ServeHTTP(rsp http.ResponseWriter, req *http.Request) {
 func (wkws *Wkws) HandlerHttpRequest(c *Context) (Controller, error) {
 	handler, verify := wkws.VerifyMethod(c.Request.URL.Path, c.Request.Method)
 	if !verify {
-		ServerFailed(c)
+		ServerMethodsNotAllowed(c)
 		return nil, &WkwsError{Msg: "error"}
 	}
 	// TODO Handler Request Params
@@ -62,7 +62,7 @@ func (wkws *Wkws) VerifyMethod(path string, method string) (Controller, bool) {
 	return nil, false
 }
 
-func ServerFailed(c *Context) {
+func ServerMethodsNotAllowed(c *Context) {
 	c.ResponseWriter.WriteHeader(405)
 	_, err := c.ResponseWriter.Write([]byte("405 method not allowed"))
 	if err != nil {
