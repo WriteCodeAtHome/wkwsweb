@@ -1,6 +1,9 @@
 package wkwsweb
 
-import "net/http"
+import (
+	"encoding/json"
+	"net/http"
+)
 
 type Param struct {
 	Key   string
@@ -43,4 +46,17 @@ func (ctx *Context) Set(key string, value interface{}) {
 func (ctx *Context) Get(key string) interface{} {
 	value := ctx.Cache[key]
 	return value
+}
+
+func (ctx *Context) ResponseJSON(data interface{}) {
+	ctx.ResponseWriter.Header().Add("Content-type", "application/json")
+	marshal, err := json.Marshal(data)
+	if err != nil {
+		return
+	}
+	_, err = ctx.ResponseWriter.Write(marshal)
+	if err != nil {
+		CLogger("Cannot write response json %v", err)
+		return
+	}
 }

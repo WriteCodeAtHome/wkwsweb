@@ -19,6 +19,12 @@ func CacheController(ctx *Context) {
 	ctx.ResponseWriter.Write(bytes)
 }
 
+func ResponseController(ctx *Context) {
+	ctx.ResponseJSON(H{
+		"HelloWorld": "Millyn",
+	})
+}
+
 func TestWkws_Run(t *testing.T) {
 	core := Init()
 	core.POST("/post", PostController)
@@ -32,6 +38,7 @@ func TestWkws_Run(t *testing.T) {
 func TestWkws_ContextCache(t *testing.T) {
 	core := Init()
 	core.GET("/cache", CacheController)
+	core.GET("/response", ResponseController)
 	err := core.Run("0.0.0.0", "8081")
 	if err != nil {
 		log.Println(err)
