@@ -2,22 +2,15 @@ package wkwsweb
 
 import (
 	"log"
-	"net/http"
 	"testing"
 )
 
-func PostController(rsp http.ResponseWriter, req *http.Request) {
-	_, err := rsp.Write([]byte("The is POST method"))
-	if err != nil {
-		return
-	}
+func PostController(ctx *Context) {
+	ctx.ResponseWriter.Write([]byte("This is Post Controller"))
 }
 
-func GetController(rsp http.ResponseWriter, req *http.Request) {
-	_, err := rsp.Write([]byte("The is GET method"))
-	if err != nil {
-		return
-	}
+func GetController(ctx *Context) {
+	ctx.ResponseWriter.Write([]byte("This is Get Controller"))
 }
 
 func TestWkws_Run(t *testing.T) {

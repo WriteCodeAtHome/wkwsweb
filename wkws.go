@@ -4,6 +4,10 @@ import (
 	"net/http"
 )
 
+type Error struct {
+	Err error
+}
+
 type Wkws struct {
 	Address     string `json:"address"`
 	Port        string `json:"port"`
@@ -25,7 +29,7 @@ func (wkws *Wkws) Run() (err error) {
 	r := http.NewServeMux()
 	CLogger("Router map:")
 	for _, router := range wkws.RouterGroup {
-		r.HandleFunc(router.Path, router.Handler)
+		r.HandleFunc(router.Path, wkws.ServeHTTP)
 		CLogger(router.Method + " " + router.Path)
 	}
 	err = http.ListenAndServe(addr, r)
@@ -36,23 +40,27 @@ func (wkws *Wkws) ServeHTTP(rsp http.ResponseWriter, req *http.Request) {
 	c := Context{}
 	c.Request = req
 	c.ResponseWriter = rsp
-	wkws.CheckMethod(&c)
-}
-
-func (wkws *Wkws) CheckMethod(c *Context) {
-	verify := wkws.VerifyMethod(c.Request.RequestURI, c.Request.Method)
-	if !verify {
-		ServerFailed(c)
+	controller, err := wkws.CheckMethod(&c)
+	if err != nil {
 		return
 	}
-	c.ResponseWriter.Write([]byte("Hello World"))
+	controller(&c)
 }
 
-func (wkws *Wkws) VerifyMethod(path string, method string) bool {
+func (wkws *Wkws) CheckMethod(c *Context) (Controller, error) {
+	handler, verify := wkws.VerifyMethod(c.Request.RequestURI, c.Request.Method)
+	if !verify {
+		ServerFailed(c)
+		return nil, &WkwsError{Msg: "error"}
+	}
+	return handler, nil
+}
+
+func (wkws *Wkws) VerifyMethod(path string, method string) (Controller, bool) {
 	for _, r := range wkws.RouterGroup {
 		if r.Path == path && r.Method == method {
-			return true
+			return r.Handler, true
 		}
 	}
-	return false
+	return nil, false
 }

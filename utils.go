@@ -8,3 +8,11 @@ func ServerFailed(c *Context) {
 	}
 	return
 }
+
+type WkwsError struct {
+	Msg string
+}
+
+func (e *WkwsError) Error() string {
+	return e.Msg
+}
