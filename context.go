@@ -48,6 +48,14 @@ func (ctx *Context) Get(key string) interface{} {
 	return value
 }
 
+func (ctx *Context) GetMap() map[string][]string {
+	return ctx.Request.PostForm
+}
+
+func (ctx *Context) GetRequestContext() string {
+	return ctx.Request.Header["Content-Type"][0]
+}
+
 func (ctx *Context) ResponseJSON(data interface{}) {
 	ctx.ResponseWriter.Header().Add("Content-type", "application/json")
 	marshal, err := json.Marshal(data)

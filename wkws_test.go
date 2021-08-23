@@ -2,10 +2,15 @@ package wkwsweb
 
 import (
 	"log"
+	"net/http/httptest"
 	"testing"
 )
 
 func PostController(ctx *Context) {
+	log.Println(ctx.GetMap())
+	log.Println(ctx.Request.Method)
+	log.Println(ctx.Request.Header["Content-Type"])
+	log.Println(ctx.GetRequestContext())
 	ctx.ResponseWriter.Write([]byte("This is Post Controller"))
 }
 
@@ -25,23 +30,15 @@ func ResponseController(ctx *Context) {
 	})
 }
 
-func TestWkws_Run(t *testing.T) {
-	core := Init()
-	core.POST("/post", PostController)
-	core.GET("/get", GetController)
-	err := core.Run("0.0.0.0", "8081")
-	if err != nil {
-		log.Println(err)
-	}
-}
-
-func TestWkws_ContextCache(t *testing.T) {
+func TestWkws_HttpRun(t *testing.T) {
 	core := Init()
 	core.GET("/cache", CacheController)
 	core.GET("/response", ResponseController)
 	core.POST("/response", ResponseController)
-	err := core.Run("0.0.0.0", "8081")
-	if err != nil {
-		log.Println(err)
-	}
+
+	var ts *httptest.Server
+
+	ts = httptest.NewServer(core)
+
+	defer ts.Close()
 }

@@ -1,13 +1,15 @@
 package wkwsweb
 
-import "net/http"
+import (
+	"net/http"
+)
 
-type Routers []Router
+type RouterHandlers []RouterHandler
 
-type Router struct {
-	Handler Controller
+type RouterHandler struct {
 	Path    string
 	Method  string
+	Handler Controller
 }
 
 func (wkws *Wkws) POST(uri string, handler Controller) {
@@ -19,9 +21,9 @@ func (wkws *Wkws) GET(uri string, handler Controller) {
 }
 
 func AddRouter(method string, path string, handler Controller, core *Wkws) {
-	core.RouterGroup = append(core.RouterGroup, Router{
-		Handler: handler,
+	core.RouterHandlers = append(core.RouterHandlers, RouterHandler{
 		Path:    path,
 		Method:  method,
+		Handler: handler,
 	})
 }

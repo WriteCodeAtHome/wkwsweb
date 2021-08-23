@@ -9,12 +9,13 @@ type Error struct {
 }
 
 type Wkws struct {
-	RouterGroup Routers
+	RouterHandlers RouterHandlers
+	HttpServer     *http.Server
 }
 
 func Init() (core *Wkws) {
 	core = &Wkws{
-		RouterGroup: nil,
+		RouterHandlers: nil,
 	}
 	return
 }
@@ -25,11 +26,19 @@ func (wkws *Wkws) Run(add string, port string) (err error) {
 	r := http.NewServeMux()
 	CLogger("Router map:")
 	// TODO handler same path diff method
-	for _, router := range wkws.RouterGroup {
-		r.HandleFunc(router.Path, wkws.ServeHTTP)
-		CLogger(router.Method + " " + router.Path)
+	// Get new routers, filter router path repeat
+
+	registeredRouter := map[string]struct{}{}
+
+	for _, router := range wkws.RouterHandlers {
+		if _, exist := registeredRouter[router.Path]; !exist {
+			r.HandleFunc(router.Path, wkws.ServeHTTP)
+			registeredRouter[router.Path] = struct{}{}
+		}
+		CLogger("Router Method is %s , Path in %s , Handler is %s", router.Method, router.Path, router.Handler)
 	}
-	err = http.ListenAndServe(addr, r)
+	wkws.HttpServer = &http.Server{Addr: addr, Handler: r}
+	err = wkws.HttpServer.ListenAndServe()
 	return
 }
 
@@ -56,7 +65,7 @@ func (wkws *Wkws) handlerHttpRequest(c *Context) (Controller, error) {
 }
 
 func (wkws *Wkws) handlerVerifyRouter(path string, method string) (Controller, bool) {
-	for _, r := range wkws.RouterGroup {
+	for _, r := range wkws.RouterHandlers {
 		if r.Path == path && r.Method == method {
 			return r.Handler, true
 		}
