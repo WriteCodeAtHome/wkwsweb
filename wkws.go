@@ -25,9 +25,7 @@ func (wkws *Wkws) Run(add string, port string) (err error) {
 	CLogger("HTTP listen the address , %s \n", addr)
 	r := http.NewServeMux()
 	CLogger("Router map:")
-	// TODO handler same path diff method
 	// Get new routers, filter router path repeat
-
 	registeredRouter := map[string]struct{}{}
 
 	for _, router := range wkws.RouterHandlers {

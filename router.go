@@ -13,14 +13,14 @@ type RouterHandler struct {
 }
 
 func (wkws *Wkws) POST(uri string, handler Controller) {
-	AddRouter(http.MethodPost, uri, handler, wkws)
+	addRouter(http.MethodPost, uri, handler, wkws)
 }
 
 func (wkws *Wkws) GET(uri string, handler Controller) {
-	AddRouter(http.MethodGet, uri, handler, wkws)
+	addRouter(http.MethodGet, uri, handler, wkws)
 }
 
-func AddRouter(method string, path string, handler Controller, core *Wkws) {
+func addRouter(method string, path string, handler Controller, core *Wkws) {
 	core.RouterHandlers = append(core.RouterHandlers, RouterHandler{
 		Path:    path,
 		Method:  method,
