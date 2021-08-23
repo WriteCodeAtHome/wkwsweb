@@ -16,6 +16,7 @@ type Wkws struct {
 func Init() (core *Wkws) {
 	core = &Wkws{
 		RouterHandlers: nil,
+		HttpServer:     nil,
 	}
 	return
 }
